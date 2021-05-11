@@ -102,15 +102,17 @@ const resolvers = {
     },
 
     editAuthor: function (root, args) {
-      const author = authors.find((author) => author.name === args.name);
+      const author = Author.findOneAndUpdate(
+        { name: args.name },
+        { born: args.setBornTo },
+        {
+          returnNewDocument: true,
+        }
+      );
       if (!author) {
         return null;
       }
-      const updatedAuthor = { ...author, born: args.setBornTo };
-      authors = authors.map((author) =>
-        author.name === args.name ? updatedAuthor : author
-      );
-      return updatedAuthor;
+      return author;
     },
   },
 };
