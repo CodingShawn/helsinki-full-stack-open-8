@@ -85,12 +85,12 @@ const resolvers = {
   },
   Mutation: {
     addBook: async (root, args) => {
-      let author = Author.find({ name: args.author });
+      let author = await Author.findOne({ name: args.author });
       try {
-        if (!author.name) {
+        if (!author) {
           let newAuthor = new Author({ name: args.author });
           author = newAuthor;
-          newAuthor.save();
+          await newAuthor.save();
         }
         const book = new Book({ ...args, author });
         return book.save();
