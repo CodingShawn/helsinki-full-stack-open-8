@@ -70,15 +70,17 @@ const resolvers = {
       return Author.find({});
     },
   },
+  Book: {
+    author: async function (root) {
+      let authorID = root.author;
+      let retrievedAuthor = await Author.findById(authorID);
+      return retrievedAuthor;
+    },
+  },
   Author: {
-    bookCount: function (root) {
-      return books.reduce((acc, book) => {
-        if (book.author == root.name) {
-          return acc + 1;
-        } else {
-          return acc;
-        }
-      }, 0);
+    bookCount: async function (root) {
+      let books = await Book.find({ author: root });
+      return books.length;
     },
   },
   Mutation: {
