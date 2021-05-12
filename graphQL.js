@@ -105,7 +105,8 @@ const resolvers = {
     },
   },
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      checkIfLoggedIn(context);
       let author = await Author.findOne({ name: args.author });
       try {
         if (!author) {
@@ -122,7 +123,8 @@ const resolvers = {
       }
     },
 
-    editAuthor: function (root, args) {
+    editAuthor: function (root, args, context) {
+      checkIfLoggedIn(context);
       const author = Author.findOneAndUpdate(
         { name: args.name },
         { born: args.setBornTo },
@@ -162,6 +164,13 @@ const resolvers = {
   },
 };
 
+function checkIfLoggedIn(context) {
+  const currentUser = context.currentUser;
+  if (!currentUser) {
+    throw new AuthenticationError("Not authenticated");
+  }
+}
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -169,11 +178,11 @@ const server = new ApolloServer({
     const auth = req ? req.headers.authorization : null;
     if (auth && auth.toLowerCase().startsWith("bearer ")) {
       var decodedToken = jwt.verify(auth.substring(7, JWT_SECRET));
+      const currentUser = await User.findById(decodedToken.id).populated(
+        "friends"
+      );
+      return { currentUser };
     }
-    const currentUser = await (await User.findById(decodedToken.id)).populated(
-      "friends"
-    );
-    return { currentUser };
   },
 });
 
