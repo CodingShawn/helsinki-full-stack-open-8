@@ -7,7 +7,8 @@ require("dotenv").config();
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-const JWT_SECRET = process.env.SECRET_KEY;
+const JWT_SECRET = process.env.JWT_SECRET;
+const jwt = require("jsonwebtoken");
 
 mongoose
   .connect(MONGODB_URI, {
@@ -41,7 +42,7 @@ const typeDefs = gql`
 
   type User {
     username: String!
-    favoriteGenre: String!
+    favouriteGenre: String!
     id: ID!
   }
 
@@ -139,7 +140,10 @@ const resolvers = {
     },
 
     createUser: function (root, args) {
-      const user = new User({ username: args.username });
+      const user = new User({
+        username: args.username,
+        favouriteGenre: args.favouriteGenre,
+      });
 
       return user.save().catch((error) => {
         throw new UserInputError(error.message, {
@@ -177,10 +181,8 @@ const server = new ApolloServer({
   context: async function ({ req }) {
     const auth = req ? req.headers.authorization : null;
     if (auth && auth.toLowerCase().startsWith("bearer ")) {
-      var decodedToken = jwt.verify(auth.substring(7, JWT_SECRET));
-      const currentUser = await User.findById(decodedToken.id).populated(
-        "friends"
-      );
+      let decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
+      const currentUser = await User.findById(decodedToken.id);
       return { currentUser };
     }
   },

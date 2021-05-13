@@ -8,12 +8,11 @@ const schema = new mongoose.Schema({
     unqiue: true,
     minlength: 3,
   },
-  friends: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Person",
-    },
-  ],
+  favouriteGenre: {
+    type: String,
+    required: true,
+    minLength: 3,
+  },
 });
 
 schema.plugin(uniqueValidator);
