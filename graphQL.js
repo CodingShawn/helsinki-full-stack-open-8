@@ -82,8 +82,11 @@ const resolvers = {
     authorCount: function () {
       return Author.collection.countDocuments();
     },
-    allBooks: function () {
-      return Book.find({});
+    allBooks: function (root, args) {
+      if (!args.genre) {
+        return Book.find({});
+      }
+      return Book.find({ genres: args.genre });
     },
     allAuthors: function () {
       return Author.find({});
