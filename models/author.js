@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const schema = mongoose.Schema({
+const schema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -8,6 +8,9 @@ const schema = mongoose.Schema({
     minLength: 4,
   },
   born: {
+    type: Number,
+  },
+  bookCount: {
     type: Number,
   },
 });

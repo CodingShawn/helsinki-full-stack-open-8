@@ -24,6 +24,8 @@ mongoose
     console.log("Error connecting to MongoDB:", error.message);
   });
 
+mongoose.set("debug", true);
+
 const typeDefs = gql`
   type Book {
     title: String!
@@ -108,21 +110,17 @@ const resolvers = {
       return retrievedAuthor;
     },
   },
-  Author: {
-    bookCount: async function (root) {
-      let books = await Book.find({ author: root });
-      return books.length;
-    },
-  },
   Mutation: {
     addBook: async (root, args, context) => {
       checkIfLoggedIn(context);
       let author = await Author.findOne({ name: args.author });
       try {
         if (!author) {
-          let newAuthor = new Author({ name: args.author });
-          author = newAuthor;
-          await newAuthor.save();
+          author = new Author({ name: args.author, bookCount: 1 });
+          await author.save();
+        } else {
+          author.bookCount++;
+          await author.save();
         }
         const book = new Book({ ...args, author });
         pubsub.publish("BOOK_ADDED", { bookAdded: book });
